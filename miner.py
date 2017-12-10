@@ -2,6 +2,7 @@ import apis
 import json
 import time
 
+
 CONFIG = json.load(open('config.json'))
 
 KNOWN_COINS = {coin for pool in CONFIG['pools'] for coin in CONFIG['pools'][pool]['coins']}

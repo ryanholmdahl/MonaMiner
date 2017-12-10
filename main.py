@@ -41,9 +41,7 @@ if __name__ == '__main__':
         btc = apis.get_bitcoin_price()
         for device in devices:
             coin_profits, best_coin, best_algo = profit.get_profit_dict(devices[device], miner.KNOWN_COINS, btc)
-            if device not in miner_processes or \
-                    (coin_profits[device_current_coin[device]] < coin_profits[best_coin] and
-                        best_coin != device_current_coin[device]):
+            if device not in miner_processes or best_coin != device_current_coin[device]:
                 device_current_coin[device] = best_coin
                 if device in miner_processes:
                     miner_processes[device].terminate()

@@ -24,7 +24,7 @@
         "GroestlCoin": {
           "ccminer": ["-a", "groestl", "-o", "stratum+tcp://us-east1.groestlcoin.miningpoolhub.com:20486"]
         },
-        "FeatherCoin": {
+        "Feathercoin": {
           "ccminer": ["-a", "neoscrypt", "-o", "stratum+tcp://hub.miningpoolhub.com:20510"]
         },
         "Vertcoin": {
