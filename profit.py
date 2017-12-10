@@ -4,11 +4,11 @@ import apis
 def get_profitability(coin_dict, device_stats):
     if coin_dict['algorithm'] not in device_stats:
         return -1
-    btc = apis.get_bitcoin_price()
+    btc_price = apis.get_bitcoin_price()
     personal_block_per_hour = 3600 / float(coin_dict['block_time']) * \
                               (device_stats[coin_dict['algorithm']]['hashrate'] / float(coin_dict['nethash']))
     coin_per_hour = coin_dict['block_reward'] * personal_block_per_hour
-    return coin_per_hour * coin_dict['exchange_rate'] * 24 * btc
+    return coin_per_hour * coin_dict['exchange_rate'] * 24 * btc_price
 
 
 def get_profit_dict(device_stats, known_coins):
