@@ -1,13 +1,14 @@
 import datetime
+import json
 import subprocess
 import time
 from collections import defaultdict
+
 from matplotlib import pyplot as plt
-import apis
-import json
 
 import miner
 import profit
+
 
 # TODO: dynamic benchmarking, shared workers
 
@@ -29,6 +30,7 @@ def start_new_miner(device, coin, miner_name):
     print('Device', device, 'starting new process with arguments', args)
     return subprocess.Popen(args, creationflags=subprocess.CREATE_NEW_CONSOLE)
 
+
 if __name__ == '__main__':
     devices = get_device_stats()
     device_current_coin = {}
@@ -38,9 +40,8 @@ if __name__ == '__main__':
     while True:
         print(datetime.datetime.now())
         update_times.append(datetime.datetime.now())
-        btc = apis.get_bitcoin_price()
         for device in devices:
-            coin_profits, best_coin, best_algo = profit.get_profit_dict(devices[device], miner.KNOWN_COINS, btc)
+            coin_profits, best_coin, best_algo = profit.get_profit_dict(devices[device], miner.KNOWN_COINS)
             if device not in miner_processes or best_coin != device_current_coin[device]:
                 device_current_coin[device] = best_coin
                 if device in miner_processes:
