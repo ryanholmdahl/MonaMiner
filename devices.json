@@ -1,0 +1,20 @@
+{
+  "0": {
+    "Lyra2REv2": {
+      "ccminer": 46780000
+    },
+    "Equihash": {
+      "ccminer": 290,
+      "zminer": 560
+    },
+    "Cryptonight": {
+      "ccminer": 550
+    },
+    "Groestl": {
+      "ccminer": 47650000
+    },
+    "NeoScrypt": {
+      "ccminer": 1010000
+    }
+  }
+}
