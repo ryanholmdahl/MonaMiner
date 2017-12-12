@@ -3,6 +3,7 @@ import json
 import subprocess
 import time
 from collections import defaultdict
+import pickle
 
 from matplotlib import pyplot as plt
 
@@ -11,6 +12,18 @@ import profit
 
 
 # TODO: dynamic benchmarking, shared workers
+
+
+def load_profit_history(device_ids):
+    try:
+        profit_history, update_times = pickle.load(open('device_profit_history.pkl', 'rb'))
+        for device_id in device_ids:
+            if device_id not in profit_history:
+                profit_history[device_id] = defaultdict(list)
+    except FileNotFoundError:
+        profit_history = {device_id: defaultdict(list) for device_id in device_ids}
+        update_times = []
+    return profit_history, update_times
 
 
 def get_device_stats():
@@ -35,8 +48,7 @@ if __name__ == '__main__':
     devices = get_device_stats()
     device_current_coin = {}
     miner_processes = {}
-    profit_history = {device: defaultdict(list) for device in devices}
-    update_times = []
+    profit_history, update_times = load_profit_history(devices.keys())
     while True:
         print(datetime.datetime.now())
         update_times.append(datetime.datetime.now())
@@ -52,9 +64,10 @@ if __name__ == '__main__':
                   device_current_coin[device], 'at ${}'.format(coin_profits[best_coin]))
             for coin in coin_profits:
                 profit_history[device][coin].append(coin_profits[coin])
-                plt.plot(update_times, profit_history[device][coin], label=coin)
+                plt.plot(update_times[-len(profit_history[device][coin]):], profit_history[device][coin], label=coin)
             plt.legend()
             plt.gcf().autofmt_xdate()
             plt.savefig('history_{}.png'.format(device))
             plt.clf()
+        pickle.dump((profit_history, update_times), open('device_profit_history.pkl', 'wb'))
         time.sleep(600)
