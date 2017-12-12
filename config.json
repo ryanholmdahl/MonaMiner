@@ -2,65 +2,226 @@
   "miners": {
     "ccminer": {
       "path": "C:\\Users\\Ryan Holmdahl\\Documents\\Wallets\\ccminer\\ccminer-x64-2.2.3-cuda9\\ccminer-x64.exe",
-      "args": ["--devices", "$DEVICE"]
+      "args": [
+        "--devices",
+        "$DEVICE"
+      ]
     },
     "zminer": {
       "path": "C:\\Users\\Ryan Holmdahl\\Documents\\Wallets\\zminer\\zm_0.5.6_win\\zm.exe",
-      "args": ["--dev", "$DEVICE"]
+      "args": [
+        "--dev",
+        "$DEVICE"
+      ]
     }
   },
   "pools": {
     "miningpoolhub": {
       "fee": 0.009,
-      "coins": ["Monacoin", "Vertcoin", "Monero", "BitcoinGold", "Zcash", "Zclassic", "Zencash", "GroestlCoin", "Feathercoin"],
-      "miner_args": {
-        "ccminer": ["--user", "ryholmdahl.$DEVICE", "--pass", "d=0.25"],
-        "zminer": ["--user", "ryholmdahl.$DEVICE", "--pass", "d=0.25"]
-      },
-      "coin_miner_args": {
+      "api_key": "7f931dc99e1c794cb5e5b00850342e32cb3b37cdfe477eac81563abf1907c568",
+      "coins": {
         "Monacoin": {
-          "ccminer": ["-a", "lyra2v2", "-o", "stratum+tcp://hub.miningpoolhub.com:20593"]
+          "pool_api": {
+            "url": "https://monacoin.miningpoolhub.com/index.php?page=api&action=getpoolstatus&api_key=$API_KEY",
+            "hashrate": [
+              "getpoolstatus",
+              "data",
+              "hashrate"
+            ]
+          },
+          "miner_args": {
+            "ccminer": [
+              "-a",
+              "lyra2v2",
+              "-o",
+              "stratum+tcp://hub.miningpoolhub.com:20593"
+            ]
+          }
         },
         "GroestlCoin": {
-          "ccminer": ["-a", "groestl", "-o", "stratum+tcp://us-east1.groestlcoin.miningpoolhub.com:20486"]
+          "pool_api": {
+            "url": "https://groestlcoin.miningpoolhub.com/index.php?page=api&action=getpoolstatus&api_key=$API_KEY",
+            "hashrate": [
+              "getpoolstatus",
+              "data",
+              "hashrate"
+            ]
+          },
+          "miner_args": {
+            "ccminer": [
+              "-a",
+              "groestl",
+              "-o",
+              "stratum+tcp://us-east1.groestlcoin.miningpoolhub.com:20486"
+            ]
+          }
         },
         "Feathercoin": {
-          "ccminer": ["-a", "neoscrypt", "-o", "stratum+tcp://hub.miningpoolhub.com:20510"]
+          "pool_api": {
+            "url": "https://feathercoin.miningpoolhub.com/index.php?page=api&action=getpoolstatus&api_key=$API_KEY",
+            "hashrate": [
+              "getpoolstatus",
+              "data",
+              "hashrate"
+            ]
+          },
+          "miner_args": {
+            "ccminer": [
+              "-a",
+              "neoscrypt",
+              "-o",
+              "stratum+tcp://hub.miningpoolhub.com:20510"
+            ]
+          }
         },
         "Vertcoin": {
-          "ccminer": ["-a", "lyra2v2", "-o", "stratum+tcp://hub.miningpoolhub.com:20507"]
+          "pool_api": {
+            "url": "https://vertcoin.miningpoolhub.com/index.php?page=api&action=getpoolstatus&api_key=$API_KEY",
+            "hashrate": [
+              "getpoolstatus",
+              "data",
+              "hashrate"
+            ]
+          },
+          "miner_args": {
+            "ccminer": [
+              "-a",
+              "lyra2v2",
+              "-o",
+              "stratum+tcp://hub.miningpoolhub.com:20507"
+            ]
+          }
         },
         "Monero": {
-          "ccminer": ["-a", "cryptonight", "-o", "stratum+tcp://hub.miningpoolhub.com:20580"]
+          "pool_api": {
+            "url": "https://monero.miningpoolhub.com/index.php?page=api&action=getpoolstatus&api_key=$API_KEY",
+            "hashrate": [
+              "getpoolstatus",
+              "data",
+              "hashrate"
+            ]
+          },
+          "miner_args": {
+            "ccminer": [
+              "-a",
+              "cryptonight",
+              "-o",
+              "stratum+tcp://hub.miningpoolhub.com:20580"
+            ]
+          }
         },
         "BitcoinGold": {
-          "zminer": ["--server", "ssl://us-east.equihash-hub.miningpoolhub.com", "--port", "20595"]
+          "pool_api": {
+            "url": "https://zencash.miningpoolhub.com/index.php?page=api&action=getpoolstatus&api_key=$API_KEY",
+            "hashrate": [
+              "getpoolstatus",
+              "data",
+              "hashrate"
+            ]
+          },
+          "pool_api_url": "https://bitcoin-gold.miningpoolhub.com/index.php?page=api&action=getpoolstatus&api_key=$API_KEY",
+          "miner_args": {
+            "zminer": [
+              "--server",
+              "ssl://us-east.equihash-hub.miningpoolhub.com",
+              "--port",
+              "20595"
+            ]
+          }
         },
         "Zcash": {
-          "zminer": ["--server", "ssl://us-east.equihash-hub.miningpoolhub.com", "--port", "20570"]
+          "pool_api": {
+            "url": "https://zencash.miningpoolhub.com/index.php?page=api&action=getpoolstatus&api_key=$API_KEY",
+            "hashrate": [
+              "getpoolstatus",
+              "data",
+              "hashrate"
+            ]
+          },
+          "pool_api_url": "https://zcash.miningpoolhub.com/index.php?page=api&action=getpoolstatus&api_key=$API_KEY",
+          "miner_args": {
+            "zminer": [
+              "--server",
+              "ssl://us-east.equihash-hub.miningpoolhub.com",
+              "--port",
+              "20570"
+            ]
+          }
         },
         "Zencash": {
-          "zminer": ["--server", "ssl://us-east.equihash-hub.miningpoolhub.com", "--port", "20594"]
+          "pool_api": {
+            "url": "https://zencash.miningpoolhub.com/index.php?page=api&action=getpoolstatus&api_key=$API_KEY",
+            "hashrate": [
+              "getpoolstatus",
+              "data",
+              "hashrate"
+            ]
+          },
+          "miner_args": {
+            "zminer": [
+              "--server",
+              "ssl://us-east.equihash-hub.miningpoolhub.com",
+              "--port",
+              "20594"
+            ]
+          }
         },
         "Zclassic": {
-          "zminer": ["--server", "ssl://us-east.equihash-hub.miningpoolhub.com", "--port", "20575"]
+          "pool_api_url": "https://zclassic.miningpoolhub.com/index.php?page=api&action=getpoolstatus&api_key=$API_KEY",
+          "miner_args": {
+            "zminer": [
+              "--server",
+              "ssl://us-east.equihash-hub.miningpoolhub.com",
+              "--port",
+              "20575"
+            ]
+          }
         }
+      },
+      "miner_args": {
+        "ccminer": [
+          "--user",
+          "ryholmdahl.$DEVICE",
+          "--pass",
+          "d=0.25"
+        ],
+        "zminer": [
+          "--user",
+          "ryholmdahl.$DEVICE",
+          "--pass",
+          "d=0.25"
+        ]
       }
     },
     "electroneum_space": {
       "fee": 0.001,
-      "coins": ["Electroneum"],
+      "coins": {
+        "Electroneum": {
+          "pool_api": {
+            "url": "http://api.electroneum.space/v1/stats/browser",
+            "hashrate": [
+              "config",
+              "pool",
+              "hashrate"
+            ]
+          },
+          "miner_args": {
+            "ccminer": [
+              "-a",
+              "cryptonight"
+            ]
+          }
+        }
+      },
       "miner_args": {
         "ccminer": [
-          "-u", "etnk4R4DjLKfdx6gqTjPQqRrbKM2KxJ6EW9brG6yANo29iAt6NcdncC6AKTUSJY9ZQe1QEjZPceELKYgPw4a2fWY9ik2qqnp5G",
-          "-p", "x",
-          "-o", "stratum+tcp://pool.electroneum.space:3333"
+          "-u",
+          "etnk4R4DjLKfdx6gqTjPQqRrbKM2KxJ6EW9brG6yANo29iAt6NcdncC6AKTUSJY9ZQe1QEjZPceELKYgPw4a2fWY9ik2qqnp5G",
+          "-p",
+          "x",
+          "-o",
+          "stratum+tcp://pool.electroneum.space:3333"
         ]
-      },
-      "coin_miner_args": {
-        "Electroneum": {
-          "ccminer": ["-a", "cryptonight"]
-        }
       }
     }
   }

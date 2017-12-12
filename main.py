@@ -9,6 +9,7 @@ from matplotlib import pyplot as plt
 
 import miner
 import profit
+from constants import KNOWN_COINS
 
 
 # TODO: dynamic benchmarking, shared workers
@@ -34,8 +35,8 @@ def get_device_stats():
                 "miner": max(miner_dict.keys(), key=(lambda m: miner_dict[m])),
                 "hashrate": max(miner_dict.values())
             } for algo, miner_dict in algo_dict.items()
-        } for device_id, algo_dict in benchmarks.items()
-    }
+            } for device_id, algo_dict in benchmarks.items()
+        }
 
 
 def start_new_miner(device, coin, miner_name):
@@ -53,7 +54,7 @@ if __name__ == '__main__':
         print(datetime.datetime.now())
         update_times.append(datetime.datetime.now())
         for device in devices:
-            coin_profits, best_coin, best_algo = profit.get_profit_dict(devices[device], miner.KNOWN_COINS)
+            coin_profits, best_coin, best_algo = profit.get_profit_dict(devices[device], KNOWN_COINS)
             if device not in miner_processes or best_coin != device_current_coin[device]:
                 device_current_coin[device] = best_coin
                 if device in miner_processes:

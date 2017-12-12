@@ -2,14 +2,13 @@ import time
 
 import requests
 
-WHATTOMINE_JSON_URL = 'http://whattomine.com/coins.json'
-BITCOIN_PRICE_URL = 'https://api.coindesk.com/v1/bpi/currentprice.json'
+from constants import API_WAIT_SECONDS, BITCOIN_PRICE_URL, WHATTOMINE_JSON_URL, CONFIG
 
 CACHED_BTC = [None, None]
 
 
 def get_bitcoin_price():
-    if CACHED_BTC[0] is None or time.time() > CACHED_BTC[0] + 5:
+    if CACHED_BTC[0] is None or time.time() > CACHED_BTC[0] + API_WAIT_SECONDS:
         try:
             r = requests.get(BITCOIN_PRICE_URL).json()
             CACHED_BTC[1] = float(r['bpi']['USD']['rate'].replace(',', ''))
@@ -24,22 +23,22 @@ def get_coins():
     return r.json()['coins']
 
 
-POOL_APIS = {
-    'miningpoolhub': {
-        'url': 'https://$COIN.miningpoolhub.com/index.php?page=api&action=getpoolstatus&api_key'
-               '=7f931dc99e1c794cb5e5b00850342e32cb3b37cdfe477eac81563abf1907c568',
-        'hashrate': lambda j: float(j['getpoolstatus']['data']['hashrate'])
-    },
-    'electroneum_space': {
-        'url': 'http://api.electroneum.space/v1/stats/browser',
-        'hashrate': lambda j: float(j['config']['pool']['hashrate'])
-    }
-}
+CACHED_POOL_SIZES = {}
 
 
 def get_pool_size(pool, coin):
-    r = requests.get(POOL_APIS[pool]['url'].replace('$COIN', coin)).json()
-    return POOL_APIS[pool]['hashrate'](r)
+    if pool not in CACHED_POOL_SIZES or time.time() > CACHED_POOL_SIZES[pool][0] + API_WAIT_SECONDS:
+        try:
+            api_key = CONFIG['pools'][pool]['api_key']
+            r = requests.get(
+                CONFIG['pools'][pool]['coins'][coin]['pool_api']['url'].replace('$API_KEY', api_key)
+            ).json()
+            for key in CONFIG['pools'][pool]['coins'][coin]['pool_api']['hashrate']:
+                r = r[key]
+            CACHED_POOL_SIZES[pool] = (time.time(), r)
+        except Exception:
+            print('Failed to get pool size of', pool, 'for', coin)
+    return CACHED_POOL_SIZES[pool][1]
 
 
 if __name__ == '__main__':
