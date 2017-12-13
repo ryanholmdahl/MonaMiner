@@ -1,8 +1,10 @@
 import time
 
+from json.decoder import JSONDecodeError
+
 import requests
 
-from constants import API_WAIT_SECONDS, BITCOIN_PRICE_URL, WHATTOMINE_JSON_URL, CONFIG
+from constants import API_WAIT_SECONDS, BITCOIN_PRICE_URL, WHATTOMINE_JSON_URL, CONFIG, USER_CONFIG
 
 CACHED_BTC = [None, None]
 
@@ -29,17 +31,22 @@ CACHED_POOL_SIZES = {}
 def get_pool_size(pool, coin):
     if pool not in CACHED_POOL_SIZES or time.time() > CACHED_POOL_SIZES[pool][0] + API_WAIT_SECONDS:
         try:
-            api_key = CONFIG['pools'][pool]['api_key']
-            r = requests.get(
-                CONFIG['pools'][pool]['coins'][coin]['pool_api']['url'].replace('$API_KEY', api_key)
-            ).json()
+            request = CONFIG['pools'][pool]['coins'][coin]['pool_api']['url']
+            if contains_api_key(request):
+                    api_key = USER_CONFIG['pools'][pool]['api_key']
+                    request.replace('$API_KEY', api_key)
+            r = requests.get(request).json()
             for key in CONFIG['pools'][pool]['coins'][coin]['pool_api']['hashrate']:
                 r = r[key]
             CACHED_POOL_SIZES[pool] = (time.time(), r)
-        except Exception:
-            print('Failed to get pool size of', pool, 'for', coin)
+        except requests.exceptions.RequestException:
+            print('Request failed to get pool size of', pool, 'for', coin)
+        except JSONDecodeError:
+            print('Pool size response from', pool, 'for', coin, 'could not be decoded')
     return CACHED_POOL_SIZES[pool][1]
 
+def contains_api_key(request):
+    return '$API_KEY' in request
 
 if __name__ == '__main__':
     print(get_coins().keys())

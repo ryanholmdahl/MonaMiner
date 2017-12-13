@@ -18,7 +18,6 @@
   "pools": {
     "miningpoolhub": {
       "fee": 0.009,
-      "api_key": "7f931dc99e1c794cb5e5b00850342e32cb3b37cdfe477eac81563abf1907c568",
       "coins": {
         "Monacoin": {
           "pool_api": {
