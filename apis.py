@@ -33,8 +33,8 @@ def get_pool_size(pool, coin):
         try:
             request = CONFIG['pools'][pool]['coins'][coin]['pool_api']['url']
             if contains_api_key(request):
-                    api_key = USER_CONFIG['pools'][pool]['api_key']
-                    request.replace('$API_KEY', api_key)
+                api_key = USER_CONFIG['pools'][pool]['api_key']
+                request = request.replace('$API_KEY', api_key)
             r = requests.get(request).json()
             for key in CONFIG['pools'][pool]['coins'][coin]['pool_api']['hashrate']:
                 r = r[key]
