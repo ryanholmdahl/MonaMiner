@@ -166,7 +166,14 @@
           }
         },
         "Zclassic": {
-          "pool_api_url": "https://zclassic.miningpoolhub.com/index.php?page=api&action=getpoolstatus&api_key=$API_KEY",
+          "pool_api": {
+            "url": "https://zclassic.miningpoolhub.com/index.php?page=api&action=getpoolstatus&api_key=$API_KEY",
+            "hashrate": [
+              "getpoolstatus",
+              "data",
+              "hashrate"
+            ]
+          },
           "miner_args": {
             "zminer": [
               "--server",
