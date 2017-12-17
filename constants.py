@@ -7,3 +7,5 @@ KNOWN_COINS = {coin for pool in CONFIG['pools'] for coin in CONFIG['pools'][pool
 WHATTOMINE_JSON_URL = 'http://whattomine.com/coins.json'
 BITCOIN_PRICE_URL = 'https://api.coindesk.com/v1/bpi/currentprice.json'
 API_WAIT_SECONDS = 5
+MINER_POLL_SECONDS = 10
+COIN_UPDATE_SECONDS = 600

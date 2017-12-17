@@ -1,17 +1,16 @@
 import datetime
 import json
+import pickle
 import subprocess
 import time
 from collections import defaultdict
-import pickle
 
 from matplotlib import pyplot as plt
 
 import miner
 import profit
 
-
-# TODO: dynamic benchmarking, shared workers
+from constants import KNOWN_COINS, MINER_POLL_SECONDS, COIN_UPDATE_SECONDS
 
 
 def load_profit_history(device_ids):
@@ -38,36 +37,78 @@ def get_device_stats():
         }
 
 
-def start_new_miner(device, coin, miner_name):
-    args = miner.get_miner_args(coin, device, miner_name)
-    print('Device', device, 'starting new process with arguments', args)
+def start_new_miner(device_id, coin, miner_name):
+    args = miner.get_miner_args(coin, device_id, miner_name)
+    print('Device', device_id, 'starting new process with arguments', args)
     return subprocess.Popen(args, creationflags=subprocess.CREATE_NEW_CONSOLE)
 
 
-if __name__ == '__main__':
-    devices = get_device_stats()
-    device_current_coin = {}
-    miner_processes = {}
-    profit_history, update_times = load_profit_history(devices.keys())
+def update_device_coin(device_id, device_stats, current_coin, miner_process):
+    coin_profits, best_coin, best_algo = profit.get_profit_dict(device_stats, KNOWN_COINS)
+    if miner_process is None or best_coin != current_coin:
+        if miner_process is not None:
+            miner_process.terminate()
+            miner_process.wait()
+        miner_process = start_new_miner(device_id, best_coin, device_stats[best_algo]["miner"])
+    print('Device', device_id, 'now mining', best_coin, 'at ${}'.format(coin_profits[best_coin]))
+    return best_coin, best_algo, miner_process, coin_profits
+
+
+def poll_miner(device_id, current_coin, miner_name, miner_process):
+    if miner_process.poll() is not None:
+        miner_process = start_new_miner(device_id, current_coin, miner_name)
+    return miner_process
+
+
+def plot_profit_history(device_id, device_profit_history, update_times):
+    for coin in device_profit_history:
+        plt.plot(update_times[-len(device_profit_history[coin]):], device_profit_history[coin], label=coin)
+    plt.legend()
+    plt.gcf().autofmt_xdate()
+    plt.savefig('history_{}.png'.format(device_id))
+    plt.clf()
+
+
+def main():
+    all_device_stats = get_device_stats()
+    device_current_coin = {device_id: None for device_id in all_device_stats}
+    device_current_algo = {device_id: None for device_id in all_device_stats}
+    miner_processes = {device_id: None for device_id in all_device_stats}
+    profit_history, update_times = load_profit_history(all_device_stats.keys())
+    seconds_to_poll_update = 0
+    seconds_to_coin_update = 0
     while True:
-        print(datetime.datetime.now())
-        update_times.append(datetime.datetime.now())
-        for device in devices:
-            coin_profits, best_coin, best_algo = profit.get_profit_dict(devices[device])
-            if device not in miner_processes or best_coin != device_current_coin[device]:
-                device_current_coin[device] = best_coin
-                if device in miner_processes:
-                    miner_processes[device].terminate()
-                    returncode = miner_processes[device].wait()
-                miner_processes[device] = start_new_miner(device, best_coin, devices[device][best_algo]["miner"])
-            print('Device', device, 'now mining',
-                  device_current_coin[device], 'at ${}'.format(coin_profits[best_coin]))
-            for coin in coin_profits:
-                profit_history[device][coin].append(coin_profits[coin])
-                plt.plot(update_times[-len(profit_history[device][coin]):], profit_history[device][coin], label=coin)
-            plt.legend()
-            plt.gcf().autofmt_xdate()
-            plt.savefig('history_{}.png'.format(device))
-            plt.clf()
-        pickle.dump((profit_history, update_times), open('device_profit_history.pkl', 'wb'))
-        time.sleep(600)
+
+        loop_start = time.time()
+        if seconds_to_coin_update <= 0:
+            print(datetime.datetime.now())
+            update_times.append(datetime.datetime.now())
+            for device_id, device_stats in all_device_stats.items():
+                device_current_coin[device_id], device_current_algo[device_id], \
+                miner_processes[device_id], coin_profits = update_device_coin(device_id, device_stats,
+                                                                              device_current_coin[device_id],
+                                                                              miner_processes[device_id])
+                for coin in coin_profits:
+                    profit_history[device_id][coin].append(coin_profits[coin])
+                plot_profit_history(device_id, profit_history[device_id], update_times)
+            pickle.dump((profit_history, update_times), open('device_profit_history.pkl', 'wb'))
+            seconds_to_coin_update = COIN_UPDATE_SECONDS
+        coin_update_end = time.time()
+
+        seconds_to_poll_update -= time.time() - loop_start
+        if seconds_to_poll_update <= 0:
+            for device_id, device_stats in all_device_stats.items():
+                miner_processes[device_id] = poll_miner(device_id, device_current_coin[device_id],
+                                                        device_stats[device_current_algo[device_id]]['miner'],
+                                                        miner_processes[device_id])
+            seconds_to_poll_update = MINER_POLL_SECONDS
+        seconds_to_coin_update -= time.time() - coin_update_end
+
+        sleep_time = max(0, min(seconds_to_coin_update, seconds_to_poll_update))
+        time.sleep(sleep_time)
+        seconds_to_coin_update -= sleep_time
+        seconds_to_poll_update -= sleep_time
+
+
+if __name__ == '__main__':
+    main()
