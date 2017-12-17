@@ -44,7 +44,7 @@ def start_new_miner(device_id, coin, miner_name):
 
 
 def update_device_coin(device_id, device_stats, current_coin, miner_process):
-    coin_profits, best_coin, best_algo = profit.get_profit_dict(device_stats, KNOWN_COINS)
+    coin_profits, best_coin, best_algo = profit.get_profit_dict(device_stats)
     if miner_process is None or best_coin != current_coin:
         if miner_process is not None:
             miner_process.terminate()
