@@ -22,7 +22,7 @@ def get_bitcoin_price():
 
 def get_coins():
     r = requests.get(WHATTOMINE_JSON_URL)
-    return r.json()['coins']
+    return {coin_dict['tag']: coin_dict for coin_dict in r.json()['coins'].values()}
 
 
 CACHED_POOL_SIZES = {}
@@ -45,8 +45,6 @@ def get_pool_size(pool, coin):
             print('Pool size response from', pool, 'for', coin, 'could not be decoded')
     return CACHED_POOL_SIZES[pool][1]
 
+
 def contains_api_key(request):
     return '$API_KEY' in request
-
-if __name__ == '__main__':
-    print(get_coins().keys())
