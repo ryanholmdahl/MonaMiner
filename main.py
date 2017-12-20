@@ -5,24 +5,22 @@ import subprocess
 import time
 from collections import defaultdict
 
-from matplotlib import pyplot as plt
+import pygal
 
 import miner
 import profit
-
-from constants import KNOWN_COINS, MINER_POLL_SECONDS, COIN_UPDATE_SECONDS
+from constants import MINER_POLL_SECONDS, COIN_UPDATE_SECONDS
 
 
 def load_profit_history(device_ids):
     try:
-        profit_history, update_times = pickle.load(open('device_profit_history.pkl', 'rb'))
+        profit_history = pickle.load(open('device_profit_history.pkl', 'rb'))
         for device_id in device_ids:
             if device_id not in profit_history:
                 profit_history[device_id] = defaultdict(list)
     except FileNotFoundError:
         profit_history = {device_id: defaultdict(list) for device_id in device_ids}
-        update_times = []
-    return profit_history, update_times
+    return profit_history
 
 
 def get_device_stats():
@@ -60,13 +58,21 @@ def poll_miner(device_id, current_coin, miner_name, miner_process):
     return miner_process
 
 
-def plot_profit_history(device_id, device_profit_history, update_times):
+def plot_profit_history(device_id, device_profit_history):
+    line_chart = pygal.DateTimeLine(x_label_rotation=35,
+                                    truncate_label=-1,
+                                    x_value_formatter=lambda dt: dt.strftime('%d, %b %Y'),
+                                    show_dots=False,
+                                    y_title='USD/Day')
+    line_chart.title = 'Device {} Profit'.format(device_id)
+
+    max_profits = defaultdict(int)
     for coin in device_profit_history:
-        plt.plot(update_times[-len(device_profit_history[coin]):], device_profit_history[coin], label=coin)
-    plt.legend()
-    plt.gcf().autofmt_xdate()
-    plt.savefig('history_{}.png'.format(device_id))
-    plt.clf()
+        line_chart.add(coin, device_profit_history[coin])
+        for t, p in device_profit_history[coin]:
+            max_profits[t] = max(max_profits[t], p)
+    line_chart.add('Max Profit', sorted(list(max_profits.items()), key=lambda x: x[0]))
+    line_chart.render_to_file('profit_{}.html'.format(device_id))
 
 
 def main():
@@ -74,24 +80,23 @@ def main():
     device_current_coin = {device_id: None for device_id in all_device_stats}
     device_current_algo = {device_id: None for device_id in all_device_stats}
     miner_processes = {device_id: None for device_id in all_device_stats}
-    profit_history, update_times = load_profit_history(all_device_stats.keys())
+    profit_history = load_profit_history(all_device_stats.keys())
     seconds_to_poll_update = 0
     seconds_to_coin_update = 0
     while True:
-
         loop_start = time.time()
         if seconds_to_coin_update <= 0:
-            print(datetime.datetime.now())
-            update_times.append(datetime.datetime.now())
+            now = datetime.datetime.now()
+            print(now)
             for device_id, device_stats in all_device_stats.items():
                 device_current_coin[device_id], device_current_algo[device_id], \
                 miner_processes[device_id], coin_profits = update_device_coin(device_id, device_stats,
                                                                               device_current_coin[device_id],
                                                                               miner_processes[device_id])
                 for coin in coin_profits:
-                    profit_history[device_id][coin].append(coin_profits[coin])
-                plot_profit_history(device_id, profit_history[device_id], update_times)
-            pickle.dump((profit_history, update_times), open('device_profit_history.pkl', 'wb'))
+                    profit_history[device_id][coin].append((now, coin_profits[coin]))
+                plot_profit_history(device_id, profit_history[device_id])
+            pickle.dump(profit_history, open('device_profit_history.pkl', 'wb'))
             seconds_to_coin_update = COIN_UPDATE_SECONDS
         coin_update_end = time.time()
 
